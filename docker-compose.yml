@@ -1,0 +1,58 @@
+services:
+
+  api:
+    container_name: booking-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    networks:
+      - booking-network
+
+  postgres:
+    container_name: booking-postgres
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: booking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - booking-network
+
+  redis:
+    container_name: booking-redis
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - booking-network
+
+  rabbitmq:
+    container_name: booking-rabbitmq
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - booking-network
+
+volumes:
+  postgres_data:
+
+networks:
+  booking-network:
+    driver: bridge
